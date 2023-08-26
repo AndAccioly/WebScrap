@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "got": "^10.4.0",
+    "jsdom": "^11.1.0",
+    "puppeteer": "^21.1.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.1"
+  }
+}
