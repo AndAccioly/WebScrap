@@ -1,9 +1,11 @@
 const puppeteer = require('puppeteer');
+const axios = require('axios')
 
-// starting Puppeteer
 puppeteer.launch({ dumpio: true }).then(async browser => {
     const urlBuscada = 'https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=ed%3DBRS+searchprod%3D0&tipo=1'
+    const URL_SALVAR_CARTA_RASPADA = 'http://localhost:8080/carta/raspada/salvar'
     const page = await browser.newPage();
+    const EDICAO_ID = 1
 
     async function autoScroll(page, maxScrolls) {
         await page.evaluate(async (maxScrolls) => {
@@ -15,16 +17,14 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                     var scrollHeight = document.body.scrollHeight;
                     window.scrollBy(0, distance);
                     totalHeight += distance;
-                    scrolls++;  // increment counter
-
-                    // stop scrolling if reached the end or the maximum number of scrolls
+                    scrolls++;
                     if (totalHeight >= scrollHeight - window.innerHeight || scrolls >= maxScrolls) {
                         clearInterval(timer);
                         resolve();
                     }
                 }, 250);
             });
-        }, maxScrolls);  // pass maxScrolls to the function
+        }, maxScrolls);
     }
 
 
@@ -35,10 +35,10 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
         height: 800
     });
     await autoScroll(page, 200);
-    // await page.screenshot({
-    //     path: 'yoursite.png',
-    //     fullPage: true
-    // });
+    await page.screenshot({
+        path: 'yoursite.png',
+        fullPage: true
+    });
 
     let grabCardsLink = await page.evaluate(() => {
         const processarLink = (html) => {
@@ -80,9 +80,9 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                     return nome.replaceAll("<span>", "").replaceAll("</span>\n", "")
                 }
                 const processarPreco = (valor) => {
-                    let menor = parseFloat(valor.split("col-prc-menor\">")[1].split(" </div")[0].replace("R$ ", "").replace(",","."))
+                    let menor = parseFloat(valor.split("col-prc-menor\">")[1].split(" </div")[0].replace("R$ ", "").replace(",", "."))
                     let medio = parseFloat(valor.split("col-prc-medio\">")[1].split(" </div")[0].replace("R$ ", ""))
-                    return ( (menor + medio) / 2 ).toFixed(2)
+                    return ((menor + medio) / 2).toFixed(2)
                 }
 
                 let tipo = ''
@@ -92,9 +92,9 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                 let cardInfo = document.body.querySelectorAll('#card-info')
 
                 let nome = processarNome(cardInfo[0].querySelectorAll('.nome-principal')[0].innerHTML).split(" (")[0]
-
                 let numero = processarNome(cardInfo[0].querySelectorAll('.nome-principal')[0].innerHTML).split("(")[1].split("/")[0]
                 let precos = cardInfo[0].querySelectorAll('.desktop-price-lines-0')[0].querySelectorAll('div')
+                let textos = cardInfo[0].querySelectorAll('p')
 
                 for (let i = 0; i < precos.length; i++) {
                     let x = precos[i].parentElement
@@ -111,7 +111,6 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
 
                 }
 
-                let textos = cardInfo[0].querySelectorAll('p')
                 for (let i = 0; i < textos.length; i++) {
                     if (textos[i].innerHTML.includes('Tipo')) {
                         tipo = textos[i].innerHTML.split("/b> ")[1]
@@ -138,9 +137,9 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                 let edicao = cardDetalhes[2].querySelector('a').innerHTML
                 let raridades = cardDetalhes[2].querySelectorAll('span')
 
-                for(let i = 0; i < raridades.length; i++){
+                for (let i = 0; i < raridades.length; i++) {
                     let ht = raridades[i].innerHTML
-                    if(ht.includes('img')){
+                    if (ht.includes('img')) {
                         raridade = ht.split(">")[1].split("\"")[0].substr(1)
                     }
 
@@ -149,9 +148,8 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                 let anoEdicao = cardDetalhes[2].querySelector('span').innerHTML.replace("(L:", "").replace(")", "").replaceAll(/\s/g, "")
                 let edicaoLogo = document.body.querySelectorAll('.bloco-edicoes')[0].querySelector('img').getAttribute('src')
 
-
                 let items = {
-                    "carta": {
+                    "cartaRaspadaTO": {
                         nome,
                         numero,
                         imagem,
@@ -160,7 +158,7 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                         tipo,
                         cor
                     },
-                    "edicao": {
+                    "edicaoRaspadaTO": {
                         edicao,
                         edicaoLogo,
                         anoEdicao
@@ -168,14 +166,21 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                 };
                 return items;
             });
-
-            console.log({...cartaInfo, link: link.link});
+            let postCarta = { cartaRaspadaTO: cartaInfo.cartaRaspadaTO, edicaoRaspadaTO: {...cartaInfo.edicaoRaspadaTO, id: EDICAO_ID,}, link: link.link }
+            console.log(postCarta);
+            console.log("processando request")
+            try {
+                let response = await axios.post(URL_SALVAR_CARTA_RASPADA, postCarta)
+            } catch (e) {
+                console.log(e)
+            }
+            console.log("finalizando request")
+            //console.log(response)
         } catch (e) {
             console.error(e)
         }
-
     }
-
+   
     await browser.close();
 
 
