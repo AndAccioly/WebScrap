@@ -2,10 +2,12 @@ const puppeteer = require('puppeteer');
 const axios = require('axios')
 
 puppeteer.launch({ dumpio: true }).then(async browser => {
-    const urlBuscada = 'https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=ed%3DBRS+searchprod%3D0&tipo=1'
-    const URL_SALVAR_CARTA_RASPADA = 'http://localhost:8080/carta/raspada/salvar'
+    const urlBuscada = 'https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=ed%3DCRZE+searchprod%3D0&tipo=1'
+    const EDICAO_ID = 6
+
     const page = await browser.newPage();
-    const EDICAO_ID = 1
+    const URL_SALVAR_CARTA_RASPADA = 'http://localhost:8080/carta/raspada/salvar'
+    //const URL_SALVAR_CARTA_RASPADA = 'https://services-tcg.herokuapp.com/carta/raspada/salvar'
 
     async function autoScroll(page, maxScrolls) {
         await page.evaluate(async (maxScrolls) => {
@@ -35,10 +37,10 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
         height: 800
     });
     await autoScroll(page, 200);
-    await page.screenshot({
-        path: 'yoursite.png',
-        fullPage: true
-    });
+    // await page.screenshot({
+    //     path: 'yoursite.png',
+    //     fullPage: true
+    // });
 
     let grabCardsLink = await page.evaluate(() => {
         const processarLink = (html) => {
@@ -126,6 +128,7 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
 
                             }
                         } catch (e) {
+                            console.log('Erro 1')
                             console.log(e)
                             cor = ''
                         }
@@ -153,7 +156,7 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                         nome,
                         numero,
                         imagem,
-                        raridade,
+                        raridade: raridade === ''? "Brilhante" : raridade,
                         preco,
                         tipo,
                         cor
@@ -168,13 +171,12 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
             });
             let postCarta = { cartaRaspadaTO: cartaInfo.cartaRaspadaTO, edicaoRaspadaTO: {...cartaInfo.edicaoRaspadaTO, id: EDICAO_ID,}, link: link.link }
             console.log(postCarta);
-            console.log("processando request")
             try {
                 let response = await axios.post(URL_SALVAR_CARTA_RASPADA, postCarta)
             } catch (e) {
+                console.log('Erro 2')
                 console.log(e)
             }
-            console.log("finalizando request")
             //console.log(response)
         } catch (e) {
             console.error(e)
