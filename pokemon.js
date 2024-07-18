@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer');
 const axios = require('axios')
 
 puppeteer.launch({ dumpio: true }).then(async browser => {
-    const urlBuscada = 'https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=ed%3DCRZE+searchprod%3D0&tipo=1'
-    const EDICAO_ID = 6
+    const urlBuscada = 'https://www.ligapokemon.com.br/?view=cards%2Fsearch&tipo=1&card=ed%3DSV1+searchprod%3D0'
+    const EDICAO_ID = 10
 
     const page = await browser.newPage();
     const URL_SALVAR_CARTA_RASPADA = 'http://localhost:8080/carta/raspada/salvar'
@@ -83,7 +83,7 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                 }
                 const processarPreco = (valor) => {
                     let menor = parseFloat(valor.split("col-prc-menor\">")[1].split(" </div")[0].replace("R$ ", "").replace(",", "."))
-                    let medio = parseFloat(valor.split("col-prc-medio\">")[1].split(" </div")[0].replace("R$ ", ""))
+                    let medio = parseFloat(valor.split("col-prc-medio\">")[1].split(" </div")[0].replace("R$ ", "").replace(",", "."))
                     return ((menor + medio) / 2).toFixed(2)
                 }
 
