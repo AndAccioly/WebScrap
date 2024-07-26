@@ -2,11 +2,12 @@ const puppeteer = require('puppeteer');
 const axios = require('axios')
 
 puppeteer.launch({ dumpio: true }).then(async browser => {
-    const urlBuscada = 'https://www.ligadigimon.com.br/?view=cards%2Fsearch&card=ed%3DBT8+searchprod%3D0&tipo=1'
-    const EDICAO_ID = 9
+    const urlBuscada = 'https://www.ligadigimon.com.br/?view=cards%2Fsearch&card=ed%3DBT9+searchprod%3D0&tipo=1'
+    const EDICAO_ID = 33
 
     const page = await browser.newPage();
     const URL_SALVAR_CARTA_RASPADA = 'http://localhost:8080/carta/raspada/digimon/salvar'
+    //const URL_SALVAR_CARTA_RASPADA = 'https://services-tcg.herokuapp.com/carta/raspada/digimon/salvar'
 
     async function autoScroll(page, maxScrolls) {
         await page.evaluate(async (maxScrolls) => {
@@ -95,8 +96,6 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                
                 for (let i = 0; i < precos.length; i++) {
                     let x = precos[i].parentElement
-                    console.log('precos')
-                    console.log(x.innerHTML)
                     if (x.innerHTML.includes("Preço Médio card Normal")) {
                         if (x.innerHTML.includes("col-prc-medio")) {
                             let y = x.querySelectorAll('div')
@@ -136,7 +135,6 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
                 return items;
             });
             let postCarta = { cartaRaspadaTO: cartaInfo.cartaRaspadaTO, edicaoRaspadaTO: {...cartaInfo.edicaoRaspadaTO, id: EDICAO_ID,}, link: link.link }
-            console.log(postCarta);
             try {
                 let response = await axios.post(URL_SALVAR_CARTA_RASPADA, postCarta)
             } catch (e) {
