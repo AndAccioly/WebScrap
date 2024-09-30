@@ -26,6 +26,8 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
             });
             await page.waitForSelector('body');
             let cartaInfo = await page.evaluate(() => {
+
+
                 const processarPreco = (valor) => {
                     let menor = parseFloat(valor.split("col-prc-menor\">")[1].split(" </div")[0].replace("R$ ", "").replace(",", "."))
                     let medio = parseFloat(valor.split("col-prc-medio\">")[1].split(" </div")[0].replace("R$ ", "").replace(",", "."))
@@ -52,14 +54,36 @@ puppeteer.launch({ dumpio: true }).then(async browser => {
 
                 }
 
-                let items = { "preco": preco }
+                let abaCards = document.body.querySelectorAll('#aba-cards')
 
-                return items;
+                let extras = {qualidade: abaCards[0].querySelectorAll('.e-col4'), preco: abaCards[0].querySelectorAll('.e-col3')}
+                let fim = []
+                for (let i = 0; i < extras.qualidade.length; i++) {
+                    console.log('qualidade')
+                    console.log(extras.qualidade[i].innerHTML)
+                    let q = extras.qualidade[i].querySelector('option')
+                    let x = extras.qualidade[i].innerHTML.split('</font')[0].split('<font')[1]
+                    if(x !== undefined && x !== null && x.split('>').length > 0){
+                        console.log('x ' + x.split('>')[1])
+                        console.log(x.split('>')[1] == 'NM')
+                        if(x.split('>')[1] == 'NM'){
+                            fim.concat([{qualidade: x.split('>')[1]}])
+                        }
+                    } 
+                    console.log('fimm')
+                    console.log(fim)
+                    console.log('fimm2')
+                }
+                
+                
+                return { "preco": preco };
             });
+
+            
             let postCarta = { cartaId: carta.id, valor: cartaInfo.preco }
             try {
                 if(Number(cartaInfo.preco) > 0.01){
-                    await axios.post(URL_CARTA_SALVAR, postCarta)
+                    //await axios.post(URL_CARTA_SALVAR, postCarta)
                 }
             } catch (e) {
                 console.log('Erro 1')

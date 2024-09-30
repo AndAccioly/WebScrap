@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer');
 const axios = require('axios')
 
 puppeteer.launch({ dumpio: true }).then(async browser => {
-    const urlBuscada = 'https://www.ligadigimon.com.br/?view=cards%2Fsearch&card=ed%3DRB01+searchprod%3D0&tipo=1'
-    const EDICAO_ID = 13
+    const urlBuscada = 'https://www.ligadigimon.com.br/?view=cards%2Fsearch&card=ed%3DP1+searchprod%3D0&tipo=1'
+    const EDICAO_ID = 133
 
     const page = await browser.newPage();
     const URL_SALVAR_CARTA_RASPADA = 'http://localhost:8080/carta/raspada/digimon/salvar'
