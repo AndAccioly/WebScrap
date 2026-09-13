@@ -1,10 +1,13 @@
 {
   "dependencies": {
+    "@supabase/supabase-js": "^2.47.10",
     "axios": "^1.5.0",
     "cheerio": "^1.0.0-rc.12",
     "got": "^10.4.0",
     "jsdom": "^11.1.0",
     "puppeteer": "^21.1.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"
   },
